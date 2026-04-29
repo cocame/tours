@@ -56,33 +56,36 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .delete-row-btn { background:none; border:none; color:#DDD; cursor:pointer; font-size:16px; padding:4px 6px; border-radius:4px; }
 .delete-row-btn:hover { color:#C0392B; }
 .empty-state { text-align:center; padding:40px 20px; color:#AAA; font-size:14px; }
+.note-input { width:100%; min-width:90px; padding:5px 8px; border:1.5px solid #E0DDD8; border-radius:6px; font-size:13px; background:#F4F4F2; outline:none; }
+.note-input:focus { border-color:#C9A84C; background:#fff; }
+.date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
+.date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
+.tour-checkboxes { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:200px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; padding:10px 12px; }
+.tour-check { display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; }
+.tour-check input { width:16px; height:16px; accent-color:#C9A84C; cursor:pointer; }
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:200; align-items:center; justify-content:center; }
 .overlay.active { display:flex; }
 .modal { background:#fff; border-radius:14px; padding:26px; width:340px; max-width:92vw; box-shadow:0 8px 40px rgba(0,0,0,0.12); }
 .modal h3 { font-size:15px; font-weight:700; margin-bottom:18px; }
 .modal label { display:block; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#888; margin-bottom:5px; }
-.modal input,.modal select { width:100%; padding:9px 12px; border:1.5px solid #E0DDD8; border-radius:8px; font-size:14px; margin-bottom:14px; outline:none; background:#F4F4F2; }
-.modal input:focus,.modal select:focus { border-color:#C9A84C; background:#fff; }
+.modal input, .modal select { width:100%; padding:9px 12px; border:1.5px solid #E0DDD8; border-radius:8px; font-size:14px; margin-bottom:14px; outline:none; background:#F4F4F2; }
+.modal input:focus, .modal select:focus { border-color:#C9A84C; background:#fff; }
 .modal-btns { display:flex; gap:10px; }
 .btn { flex:1; padding:10px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; }
 .btn-primary { background:#C9A84C; color:#fff; }
-.note-input { width:100%; min-width:80px; padding:5px 8px; border:1.5px solid #E0DDD8; border-radius:6px; font-size:13px; background:#F4F4F2; outline:none; }
-.note-input:focus { border-color:#C9A84C; background:#fff; }
-.date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
-.date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
-.tour-checkboxes { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:180px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; padding:10px 12px; }
-.tour-check { display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; }
-.tour-check input { width:16px; height:16px; accent-color:#C9A84C; cursor:pointer; }
-
+.btn-secondary { background:#F0EDE8; color:#1A1A1A; }
 </style>
 </head>
 <body>
+
 <div class="topbar">
   <div class="topbar-logo">Narada Tours</div>
   <div class="topbar-user" id="userLabel">...</div>
 </div>
+
 <div id="noAccess" class="no-access" style="display:none">Нет доступа. Используй свою ссылку.</div>
 <div id="loadingScreen" class="loading">Загрузка...</div>
+
 <div id="appWrap" style="display:none">
   <div class="tabs">
     <div class="tab active" id="tabEdut" onclick="switchTab('edut')">ЕДУТ</div>
@@ -90,16 +93,15 @@ td.col-manager { text-align:center; padding:7px 8px; }
     <div class="tab" id="tabManagers" onclick="switchTab('managers')" style="display:none">МЕНЕДЖЕРЫ</div>
   </div>
   <div class="main">
+
     <div id="sectionEdut">
       <div class="table-wrap">
-        <table>
-          <thead id="edutHead"></thead>
-          <tbody id="edutBody"></tbody>
-        </table>
+        <table><thead id="edutHead"></thead><tbody id="edutBody"></tbody></table>
         <div class="empty-state" id="edutEmpty" style="display:none">Нет записей. Добавь первую строку ↓</div>
         <button class="add-row-btn" id="edutAddBtn" style="display:none" onclick="openEdutModal()">+ Добавить дату и тур</button>
       </div>
     </div>
+
     <div id="sectionZapros" style="display:none">
       <div class="table-wrap">
         <table>
@@ -116,6 +118,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
         <button class="add-row-btn" onclick="openZaprosModal()">+ Добавить запрос</button>
       </div>
     </div>
+
     <div id="sectionManagers" style="display:none">
       <div class="admin-panel">
         <h4>Менеджеры</h4>
@@ -130,9 +133,11 @@ td.col-manager { text-align:center; padding:7px 8px; }
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
+<!-- EDUT MODAL -->
 <div class="overlay" id="edutModal">
   <div class="modal">
     <h3>Новая строка</h3>
@@ -157,6 +162,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
   </div>
 </div>
 
+<!-- ZAPROS MODAL -->
 <div class="overlay" id="zaprosModal">
   <div class="modal">
     <h3>Новый запрос</h3>
@@ -184,7 +190,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
       <label class="tour-check"><input type="checkbox" value="VinWonders"> VinWonders</label>
       <label class="tour-check"><input type="checkbox" value="Хой Ан"> Хой Ан</label>
       <label class="tour-check"><input type="checkbox" value="Хюэ"> Хюэ</label>
-      <label class="tour-check" id="checkLuboi"><input type="checkbox" value="Любой" onchange="toggleLuboi(this)"> Любой</label>
+      <label class="tour-check"><input type="checkbox" value="Любой" onchange="toggleLuboi(this)"> Любой</label>
     </div>
     <label>Количество человек</label>
     <input type="number" id="zaprosCount" min="1" placeholder="0">
@@ -196,8 +202,9 @@ td.col-manager { text-align:center; padding:7px 8px; }
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwFfckkBCP0lziK_xiuY0tKtLQ1IQjdbRsdwmliMJ2K-PUxcIroGKwTs0aR-b1qiiM/exec';
-let token='', user=null, edutData=[], zaprosData=[], sortDir='asc';
+const API = 'https://script.google.com/macros/s/AKfycbx7b5IqL-DyQuYuIKCaesHdcfIYDKH-e6YdJ-mC7_6uHFZGL8fDJ_ZwPQiy6WxY2Ft9/exec';
+
+let token='', user=null, edutData=[], edutManagers=[], zaprosData=[], sortDir='asc', zaprosSort='asc';
 
 async function api(params) {
   const url = API + '?' + new URLSearchParams({...params, token});
@@ -214,7 +221,8 @@ async function init() {
   document.getElementById('userLabel').textContent = user.name;
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('appWrap').style.display = 'block';
-  if (user.role==='Таис'||user.role==='Ленар') {
+  const isAdmin = user.role==='Таис'||user.role==='Ленар';
+  if (isAdmin) {
     document.getElementById('tabManagers').style.display = 'block';
     document.getElementById('edutAddBtn').style.display = 'flex';
     document.getElementById('zaprosDelHead').style.display = '';
@@ -247,21 +255,18 @@ function switchTab(tab) {
 }
 function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
 
+// ── EDUT ──────────────────────────────────────────────────────────────────
 async function loadEdut() {
   const res = await api({action:'getEdut'});
-  edutData = res.rows||[];
+  edutData = res.rows || [];
+  edutManagers = res.managers || []; // SOURCE OF TRUTH for managers
   renderEdut();
 }
 
-function getEdutManagers() {
-  if (!edutData.length) return [];
-  return Object.keys(edutData[0]).filter(k=>k!=='date'&&k!=='tour'&&k!=='_row');
-}
-
 function renderEdut() {
-  const managers = getEdutManagers();
-  const visible = managers.filter(m=>showCol(m));
+  const visible = edutManagers.filter(m=>showCol(m));
   const isAdmin = user.role==='Таис'||user.role==='Ленар';
+
   let html = `<tr><th class="sortable ${sortDir}" onclick="toggleSort()">Дата<span class="arr"></span></th><th>Тур</th><th class="col-total">Итого</th>`;
   visible.forEach(m => html += `<th class="${m===user.name?'col-mine':''}">${m}</th>`);
   if (isAdmin) html += '<th></th>';
@@ -271,7 +276,7 @@ function renderEdut() {
   const body = document.getElementById('edutBody');
   const empty = document.getElementById('edutEmpty');
   if (!edutData.length) { body.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display = 'none';
+  empty.style.display='none';
 
   const sorted = [...edutData].sort((a,b)=>{
     const c = String(a.date).localeCompare(String(b.date));
@@ -279,132 +284,95 @@ function renderEdut() {
   });
 
   body.innerHTML = sorted.map(row => {
-    const total = managers.reduce((s,m)=>s+(parseInt(row[m])||0),0);
+    const total = edutManagers.reduce((s,m)=>s+(parseInt(row[m])||0),0);
     const cells = visible.map(m => {
       const val = row[m]||'';
       if (canEdit(m)) return `<td class="col-manager"><input class="num-input" data-row="${row._row}" data-manager="${m}" type="number" min="0" max="999" value="${val}" placeholder="0" oninput="localUpdate(this)" onblur="saveCount(this)"></td>`;
       return `<td class="col-manager"><span class="num-display">${val||'—'}</span></td>`;
     }).join('');
     const del = isAdmin?`<td><button class="delete-row-btn" onclick="deleteEdutRow(${row._row})">✕</button></td>`:'';
-    return `<tr><td class="col-date">${formatDate(row.date)}</td><td class="col-excursion">${row.tour}</td><td class="col-total">${total||'—'}</td>${cells}${del}</tr>`;
+    return `<tr><td class="col-date">${row.date}</td><td class="col-excursion">${row.tour}</td><td class="col-total" id="total-${row._row}">${total||'—'}</td>${cells}${del}</tr>`;
   }).join('');
 }
 
 function toggleSort() { sortDir=sortDir==='asc'?'desc':'asc'; renderEdut(); }
 
-function formatDate(d) {
-  if (!d || d === '0' || d === '') return '';
-  const s = String(d).trim();
-  // Date range like 03.05–06.05 — return as is
-  if (s.includes('–') || s.includes('-') && s.includes('.')) return s;
-  // Already DD.MM
-  if (/^\d{1,2}\.\d{2}$/.test(s)) {
-    const parts = s.split('.');
-    return parts[0].padStart(2,'0') + '.' + parts[1];
-  }
-  // ISO with T
-  if (s.includes('T')) {
-    const parts = s.split('T')[0].split('-');
-    return parts[2].padStart(2,'0') + '.' + parts[1].padStart(2,'0');
-  }
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-    const [y,m,day] = s.split('-');
-    return day.padStart(2,'0') + '.' + m.padStart(2,'0');
-  }
-  return s;
-}
-
 function localUpdate(input) {
-  // instantly update total in the same row
   const tr = input.closest('tr');
   const inputs = tr.querySelectorAll('.num-input');
   let total = 0;
   inputs.forEach(inp => total += parseInt(inp.value)||0);
-  tr.querySelector('.col-total').textContent = total || '—';
+  tr.querySelector('.col-total').textContent = total||'—';
 }
 
 async function saveCount(input) {
   const rowNum = input.dataset.row;
   const managerName = input.dataset.manager;
   const value = parseInt(input.value)||0;
-  input.style.borderColor = '#E0DDD8';
   await api({action:'updateCount', rowNum, targetName:managerName, value});
-  input.style.borderColor = '#C9A84C';
 }
 
 async function deleteEdutRow(rowNum) {
   if (!confirm('Удалить строку?')) return;
-  await api({action:'deleteRow',rowNum});
+  await api({action:'deleteRow', rowNum});
   await loadEdut();
 }
 
 function openEdutModal() {
-  document.getElementById('edutDate').value=new Date().toISOString().split('T')[0];
-  document.getElementById('edutTour').value='';
-  document.getElementById('edutCustomWrap').style.display='none';
+  document.getElementById('edutDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('edutTour').value = '';
+  document.getElementById('edutCustomWrap').style.display = 'none';
   document.getElementById('edutModal').classList.add('active');
 }
 function closeEdutModal() { document.getElementById('edutModal').classList.remove('active'); }
-function toggleEdutCustom(v) { document.getElementById('edutCustomWrap').style.display=v==='__custom__'?'block':'none'; }
-
-async function saveNote(input) {
-  const rowNum = input.dataset.row;
-  const note = input.value.trim();
-  await api({action:'saveNote', rowNum, note});
-}
+function toggleEdutCustom(v) { document.getElementById('edutCustomWrap').style.display = v==='__custom__'?'block':'none'; }
 
 async function submitEdutRow() {
-  const rawDate=document.getElementById('edutDate').value;
-  let tour=document.getElementById('edutTour').value;
-  if (tour==='__custom__') tour=document.getElementById('edutCustom').value.trim();
+  const rawDate = document.getElementById('edutDate').value;
+  let tour = document.getElementById('edutTour').value;
+  if (tour==='__custom__') tour = document.getElementById('edutCustom').value.trim();
   if (!rawDate||!tour) { alert('Заполни все поля'); return; }
-  // Fix timezone: parse date parts directly without UTC conversion
   const parts = rawDate.split('-');
-  const date = `${parts[2]}.${parts[1]}`;
+  const date = parts[2]+'.'+parts[1];
   closeEdutModal();
-  await api({action:'addRow',date,tour});
+  await api({action:'addRow', date, tour});
   await loadEdut();
 }
 
+// ── ZAPROS ────────────────────────────────────────────────────────────────
 async function loadZapros() {
-  const res=await api({action:'getZapros'});
-  zaprosData=res.rows||[];
+  const res = await api({action:'getZapros'});
+  zaprosData = res.rows||[];
   renderZapros();
 }
 
-let zaprosSort = 'asc';
-
 function toggleZaprosSort() {
-  zaprosSort = zaprosSort === 'asc' ? 'desc' : 'asc';
-  const th = document.getElementById('zaprosDateTh');
-  th.className = 'sortable ' + zaprosSort;
+  zaprosSort = zaprosSort==='asc'?'desc':'asc';
+  document.getElementById('zaprosDateTh').className = 'sortable '+zaprosSort;
   renderZapros();
 }
 
 function renderZapros() {
-  const body=document.getElementById('zaprosBody');
-  const empty=document.getElementById('zaprosEmpty');
-  const isAdmin=user.role==='Таис'||user.role==='Ленар';
-  if (isAdmin) document.getElementById('zaprosDelHead').style.display='';
-
+  const body = document.getElementById('zaprosBody');
+  const empty = document.getElementById('zaprosEmpty');
+  const isAdmin = user.role==='Таис'||user.role==='Ленар';
   if (!zaprosData.length) { body.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
 
   const sorted = [...zaprosData].sort((a,b)=>{
-    const da = String(a.date), db = String(b.date);
-    return zaprosSort==='asc' ? da.localeCompare(db) : db.localeCompare(da);
+    const da=String(a.date), db=String(b.date);
+    return zaprosSort==='asc'?da.localeCompare(db):db.localeCompare(da);
   });
 
-  body.innerHTML=sorted.map(row=>{
-    const note = row.note || '';
-    const canEditNote = isAdmin || row.manager === user.name;
+  body.innerHTML = sorted.map(row=>{
+    const note = row.note||'';
+    const canEditNote = isAdmin || row.manager===user.name;
     const noteCell = canEditNote
       ? `<td style="min-width:120px"><input type="text" class="note-input" data-row="${row._row}" value="${note.replace(/"/g,'&quot;')}" placeholder="—" onblur="saveNote(this)"></td>`
-      : `<td style="font-size:13px;color:#AAA;min-width:80px">${isAdmin ? note||'—' : '—'}</td>`;
-    const del=isAdmin?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'';
+      : `<td style="font-size:13px;color:#AAA">${isAdmin?note||'—':'—'}</td>`;
+    const del = isAdmin?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'';
     return `<tr>
-      <td class="col-date">${formatDate(row.date)}</td>
+      <td class="col-date">${row.date}</td>
       <td>${row.tour}</td>
       <td style="text-align:center;font-weight:600">${row.count}</td>
       <td style="font-size:13px;color:#888">${row.manager}</td>
@@ -421,12 +389,7 @@ function setDateType(type) {
 }
 
 function toggleLuboi(cb) {
-  // if "Любой" checked — uncheck all others
-  if (cb.checked) {
-    document.querySelectorAll('.tour-check input').forEach(inp => {
-      if (inp.value !== 'Любой') inp.checked = false;
-    });
-  }
+  if (cb.checked) document.querySelectorAll('.tour-check input').forEach(inp=>{ if(inp.value!=='Любой') inp.checked=false; });
 }
 
 function openZaprosModal() {
@@ -434,7 +397,7 @@ function openZaprosModal() {
   document.getElementById('zaprosDateSingle').value = new Date().toISOString().split('T')[0];
   document.getElementById('zaprosDateFrom').value = '';
   document.getElementById('zaprosDateTo').value = '';
-  document.querySelectorAll('.tour-check input').forEach(inp => inp.checked = false);
+  document.querySelectorAll('.tour-check input').forEach(inp=>inp.checked=false);
   document.getElementById('zaprosCount').value = '';
   document.getElementById('zaprosModal').classList.add('active');
 }
@@ -446,70 +409,78 @@ async function submitZapros() {
   if (isSingle) {
     const d = document.getElementById('zaprosDateSingle').value;
     if (!d) { alert('Выбери дату'); return; }
-    const [y,m,day] = d.split('-');
-    date = `${day}.${m}`;
+    const parts = d.split('-');
+    date = parts[2]+'.'+parts[1];
   } else {
     const from = document.getElementById('zaprosDateFrom').value;
     const to = document.getElementById('zaprosDateTo').value;
     if (!from||!to) { alert('Выбери даты'); return; }
-    const [y1,m1,d1] = from.split('-');
-    const [y2,m2,d2] = to.split('-');
-    date = `${d1}.${m1}–${d2}.${m2}`;
+    const p1=from.split('-'), p2=to.split('-');
+    date = p1[2]+'.'+p1[1]+'–'+p2[2]+'.'+p2[1];
   }
   const checked = [...document.querySelectorAll('.tour-check input:checked')].map(i=>i.value);
   const tour = checked.join(', ');
-  const count=document.getElementById('zaprosCount').value;
+  const count = document.getElementById('zaprosCount').value;
   if (!tour||!count) { alert('Заполни все поля'); return; }
   closeZaprosModal();
-  await api({action:'addZapros',date,tour,count});
+  await api({action:'addZapros', date, tour, count});
   await loadZapros();
 }
 
 async function deleteZapros(rowNum) {
   if (!confirm('Удалить запрос?')) return;
-  await api({action:'deleteZapros',rowNum});
+  await api({action:'deleteZapros', rowNum});
   await loadZapros();
 }
 
+async function saveNote(input) {
+  const rowNum = input.dataset.row;
+  const note = input.value.trim();
+  await api({action:'saveNote', rowNum, note});
+}
+
+// ── MANAGERS ──────────────────────────────────────────────────────────────
 async function loadManagers() {
-  const res=await api({action:'getManagers'});
-  const managers=res.managers||[];
-  const list=document.getElementById('managerList');
-  list.innerHTML='';
+  const res = await api({action:'getManagers'});
+  const managers = res.managers||[];
+  const list = document.getElementById('managerList');
+  list.innerHTML = '';
   managers.filter(m=>m.active).forEach(m=>{
-    const tag=document.createElement('div');
-    tag.className='manager-tag';
-    const canDel = !(m.role==='Таис') && !(user.role==='Ленар'&&m.role==='Таис');
-    tag.innerHTML=`${m.name}${canDel?` <button onclick="removeManager('${m.token}')">×</button>`:''}`;
+    const tag = document.createElement('div');
+    tag.className = 'manager-tag';
+    const canDel = m.role!=='Таис' && !(user.role==='Ленар'&&m.role==='Таис');
+    tag.innerHTML = `${m.name}${canDel?` <button onclick="removeManager('${m.token}')">×</button>`:''}`;
     list.appendChild(tag);
   });
 }
 
 async function addManager() {
-  const inp=document.getElementById('newManagerInput');
-  const name=inp.value.trim();
+  const inp = document.getElementById('newManagerInput');
+  const name = inp.value.trim();
   if (!name) return;
-  document.getElementById('newLinkBox').style.display='none';
-  const res=await api({action:'addManager',name});
+  document.getElementById('newLinkBox').style.display = 'none';
+  const res = await api({action:'addManager', name});
   if (res.link) {
-    inp.value='';
-    document.getElementById('newLinkText').textContent=res.link;
-    document.getElementById('newLinkBox').style.display='flex';
+    inp.value = '';
+    document.getElementById('newLinkText').textContent = res.link;
+    document.getElementById('newLinkBox').style.display = 'flex';
     await loadManagers();
+    await loadEdut();
   }
 }
 
 async function removeManager(targetToken) {
   if (!confirm('Отключить менеджера?')) return;
-  await api({action:'removeManager',targetToken});
+  await api({action:'removeManager', targetToken});
   await loadManagers();
+  await loadEdut();
 }
 
 function copyLink() {
   navigator.clipboard.writeText(document.getElementById('newLinkText').textContent);
-  const btn=document.querySelector('#newLinkBox button');
-  btn.textContent='Скопировано!';
-  setTimeout(()=>btn.textContent='Копировать',2000);
+  const btn = document.querySelector('#newLinkBox button');
+  btn.textContent = 'Скопировано!';
+  setTimeout(()=>btn.textContent='Копировать', 2000);
 }
 
 init();
