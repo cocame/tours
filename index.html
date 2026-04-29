@@ -66,7 +66,9 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .modal-btns { display:flex; gap:10px; }
 .btn { flex:1; padding:10px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; }
 .btn-primary { background:#C9A84C; color:#fff; }
-.btn-secondary { background:#F0EDE8; color:#1A1A1A; }
+.date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
+.date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
+
 </style>
 </head>
 <body>
@@ -152,8 +154,20 @@ td.col-manager { text-align:center; padding:7px 8px; }
 <div class="overlay" id="zaprosModal">
   <div class="modal">
     <h3>Новый запрос</h3>
-    <label>Дата (или диапазон: 01–05.05)</label>
-    <input type="text" id="zaprosDate" placeholder="01.05 или 01–05.05">
+    <label>Дата</label>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="date-type-btn active" id="btnSingle" onclick="setDateType('single')">Конкретная</button>
+      <button class="date-type-btn" id="btnRange" onclick="setDateType('range')">Диапазон</button>
+    </div>
+    <div id="singleDateWrap">
+      <input type="date" id="zaprosDateSingle" style="width:100%;padding:9px 12px;border:1.5px solid #E0DDD8;border-radius:8px;font-size:14px;margin-bottom:14px;outline:none;background:#F4F4F2;">
+    </div>
+    <div id="rangeDateWrap" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="date" id="zaprosDateFrom" style="flex:1;padding:9px 12px;border:1.5px solid #E0DDD8;border-radius:8px;font-size:14px;outline:none;background:#F4F4F2;">
+        <input type="date" id="zaprosDateTo" style="flex:1;padding:9px 12px;border:1.5px solid #E0DDD8;border-radius:8px;font-size:14px;outline:none;background:#F4F4F2;">
+      </div>
+    </div>
     <label>Тур</label>
     <select id="zaprosTour" onchange="toggleZaprosCustom(this.value)">
       <option value="">— выбери —</option>
@@ -347,8 +361,18 @@ function renderZapros() {
   }).join('');
 }
 
+function setDateType(type) {
+  document.getElementById('singleDateWrap').style.display = type==='single'?'block':'none';
+  document.getElementById('rangeDateWrap').style.display = type==='range'?'block':'none';
+  document.getElementById('btnSingle').classList.toggle('active', type==='single');
+  document.getElementById('btnRange').classList.toggle('active', type==='range');
+}
+
 function openZaprosModal() {
-  document.getElementById('zaprosDate').value='';
+  setDateType('single');
+  document.getElementById('zaprosDateSingle').value = new Date().toISOString().split('T')[0];
+  document.getElementById('zaprosDateFrom').value = '';
+  document.getElementById('zaprosDateTo').value = '';
   document.getElementById('zaprosTour').value='';
   document.getElementById('zaprosCount').value='';
   document.getElementById('zaprosCustomWrap').style.display='none';
@@ -358,11 +382,25 @@ function closeZaprosModal() { document.getElementById('zaprosModal').classList.r
 function toggleZaprosCustom(v) { document.getElementById('zaprosCustomWrap').style.display=v==='__custom__'?'block':'none'; }
 
 async function submitZapros() {
-  const date=document.getElementById('zaprosDate').value.trim();
+  let date;
+  const isSingle = document.getElementById('btnSingle').classList.contains('active');
+  if (isSingle) {
+    const d = document.getElementById('zaprosDateSingle').value;
+    if (!d) { alert('Выбери дату'); return; }
+    const [y,m,day] = d.split('-');
+    date = `${day}.${m}`;
+  } else {
+    const from = document.getElementById('zaprosDateFrom').value;
+    const to = document.getElementById('zaprosDateTo').value;
+    if (!from||!to) { alert('Выбери даты'); return; }
+    const [y1,m1,d1] = from.split('-');
+    const [y2,m2,d2] = to.split('-');
+    date = `${d1}.${m1}–${d2}.${m2}`;
+  }
   let tour=document.getElementById('zaprosTour').value;
   if (tour==='__custom__') tour=document.getElementById('zaprosCustom').value.trim();
   const count=document.getElementById('zaprosCount').value;
-  if (!date||!tour||!count) { alert('Заполни все поля'); return; }
+  if (!tour||!count) { alert('Заполни все поля'); return; }
   closeZaprosModal();
   await api({action:'addZapros',date,tour,count});
   await loadZapros();
