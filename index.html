@@ -66,6 +66,8 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .modal-btns { display:flex; gap:10px; }
 .btn { flex:1; padding:10px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; }
 .btn-primary { background:#C9A84C; color:#fff; }
+.note-input { width:100%; min-width:80px; padding:5px 8px; border:1.5px solid #E0DDD8; border-radius:6px; font-size:13px; background:#F4F4F2; outline:none; }
+.note-input:focus { border-color:#C9A84C; background:#fff; }
 .date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
 .date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
 .tour-checkboxes { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:180px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; padding:10px 12px; }
@@ -101,9 +103,10 @@ td.col-manager { text-align:center; padding:7px 8px; }
     <div id="sectionZapros" style="display:none">
       <div class="table-wrap">
         <table>
-          <thead>
+          <thead id="zaprosHead">
             <tr>
-              <th>Дата</th><th>Тур</th><th>Кол-во</th><th>Менеджер</th>
+              <th class="sortable" id="zaprosDateTh" onclick="toggleZaprosSort()">Дата<span class="arr"></span></th>
+              <th>Тур</th><th>Кол-во</th><th>Менеджер</th><th>Примечание</th>
               <th id="zaprosDelHead" style="display:none"></th>
             </tr>
           </thead>
@@ -291,15 +294,23 @@ function toggleSort() { sortDir=sortDir==='asc'?'desc':'asc'; renderEdut(); }
 
 function formatDate(d) {
   if (!d) return '';
-  const s = String(d);
-  // Google Sheets date as number
-  if (!isNaN(s) && s.length > 4) {
+  const s = String(d).trim();
+  // Google Sheets serial number
+  if (/^\d+(\.\d+)?$/.test(s) && parseFloat(s) > 1000) {
     const date = new Date(Math.round((parseFloat(s) - 25569) * 86400 * 1000));
     const day = String(date.getUTCDate()).padStart(2,'0');
     const mon = String(date.getUTCMonth()+1).padStart(2,'0');
     return `${day}.${mon}`;
   }
-  if (s.includes('-')) { const [y,m,day]=s.split('-'); return `${day}.${m}`; }
+  // ISO format 2026-05-01 or with T
+  if (s.includes('T')) {
+    const parts = s.split('T')[0].split('-');
+    return `${parts[2]}.${parts[1]}`;
+  }
+  if (s.includes('-')) {
+    const [y,m,day] = s.split('-');
+    return `${day}.${m}`;
+  }
   return s;
 }
 
@@ -336,11 +347,19 @@ function openEdutModal() {
 function closeEdutModal() { document.getElementById('edutModal').classList.remove('active'); }
 function toggleEdutCustom(v) { document.getElementById('edutCustomWrap').style.display=v==='__custom__'?'block':'none'; }
 
+async function saveNote(input) {
+  const rowNum = input.dataset.row;
+  const note = input.value.trim();
+  await api({action:'saveNote', rowNum, note});
+}
+
 async function submitEdutRow() {
-  const date=document.getElementById('edutDate').value;
+  const rawDate=document.getElementById('edutDate').value;
   let tour=document.getElementById('edutTour').value;
   if (tour==='__custom__') tour=document.getElementById('edutCustom').value.trim();
-  if (!date||!tour) { alert('Заполни все поля'); return; }
+  if (!rawDate||!tour) { alert('Заполни все поля'); return; }
+  const [y,m,day] = rawDate.split('-');
+  const date = `${day}.${m}`;
   closeEdutModal();
   await api({action:'addRow',date,tour});
   await loadEdut();
@@ -352,15 +371,43 @@ async function loadZapros() {
   renderZapros();
 }
 
+let zaprosSort = 'asc';
+
+function toggleZaprosSort() {
+  zaprosSort = zaprosSort === 'asc' ? 'desc' : 'asc';
+  const th = document.getElementById('zaprosDateTh');
+  th.className = 'sortable ' + zaprosSort;
+  renderZapros();
+}
+
 function renderZapros() {
   const body=document.getElementById('zaprosBody');
   const empty=document.getElementById('zaprosEmpty');
   const isAdmin=user.role==='Таис'||user.role==='Ленар';
+  if (isAdmin) document.getElementById('zaprosDelHead').style.display='';
+
   if (!zaprosData.length) { body.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  body.innerHTML=zaprosData.map(row=>{
+
+  const sorted = [...zaprosData].sort((a,b)=>{
+    const da = String(a.date), db = String(b.date);
+    return zaprosSort==='asc' ? da.localeCompare(db) : db.localeCompare(da);
+  });
+
+  body.innerHTML=sorted.map(row=>{
+    const note = row.note || '';
+    const canEditNote = isAdmin || row.manager === user.name;
+    const noteCell = canEditNote
+      ? `<td><input type="text" class="note-input" data-row="${row._row}" value="${note}" placeholder="—" onblur="saveNote(this)"></td>`
+      : `<td style="font-size:13px;color:#AAA">${isAdmin ? note||'—' : '—'}</td>`;
     const del=isAdmin?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'';
-    return `<tr><td class="col-date">${row.date}</td><td>${row.tour}</td><td style="text-align:center;font-weight:600">${row.count}</td><td style="font-size:13px;color:#888">${row.manager}</td>${del}</tr>`;
+    return `<tr>
+      <td class="col-date">${formatDate(row.date)}</td>
+      <td>${row.tour}</td>
+      <td style="text-align:center;font-weight:600">${row.count}</td>
+      <td style="font-size:13px;color:#888">${row.manager}</td>
+      ${noteCell}${del}
+    </tr>`;
   }).join('');
 }
 
