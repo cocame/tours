@@ -176,7 +176,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyxP0wdstGW9B91SmUUs_vJC84oyDKM23HP1DV22RnKa5ws90XnpSJ_x92OUn0lT5En/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzhS-YBcCQQfL8S7YZ_CjVJTvT1l8sq8xeRHLgpePK9H08lXWLwuO4uUi1Lpc9xliiV/exec';
 let token='', user=null, edutData=[], zaprosData=[], sortDir='asc';
 
 async function api(params) {
@@ -262,7 +262,7 @@ function renderEdut() {
     const total = managers.reduce((s,m)=>s+(parseInt(row[m])||0),0);
     const cells = visible.map(m => {
       const val = row[m]||'';
-      if (canEdit(m)) return `<td class="col-manager"><input class="num-input" type="number" min="0" max="999" value="${val}" placeholder="0" onchange="updateCount(${row._row},'${m}',this.value)"></td>`;
+      if (canEdit(m)) return `<td class="col-manager"><input class="num-input" data-row="${row._row}" data-manager="${m}" type="number" min="0" max="999" value="${val}" placeholder="0" oninput="localUpdate(this)" onblur="saveCount(this)"></td>`;
       return `<td class="col-manager"><span class="num-display">${val||'—'}</span></td>`;
     }).join('');
     const del = isAdmin?`<td><button class="delete-row-btn" onclick="deleteEdutRow(${row._row})">✕</button></td>`:'';
@@ -275,13 +275,33 @@ function toggleSort() { sortDir=sortDir==='asc'?'desc':'asc'; renderEdut(); }
 function formatDate(d) {
   if (!d) return '';
   const s = String(d);
+  // Google Sheets date as number
+  if (!isNaN(s) && s.length > 4) {
+    const date = new Date(Math.round((parseFloat(s) - 25569) * 86400 * 1000));
+    const day = String(date.getUTCDate()).padStart(2,'0');
+    const mon = String(date.getUTCMonth()+1).padStart(2,'0');
+    return `${day}.${mon}`;
+  }
   if (s.includes('-')) { const [y,m,day]=s.split('-'); return `${day}.${m}`; }
   return s;
 }
 
-async function updateCount(rowNum,managerName,value) {
-  await api({action:'updateCount',rowNum,targetName:managerName,value:parseInt(value)||0});
-  await loadEdut();
+function localUpdate(input) {
+  // instantly update total in the same row
+  const tr = input.closest('tr');
+  const inputs = tr.querySelectorAll('.num-input');
+  let total = 0;
+  inputs.forEach(inp => total += parseInt(inp.value)||0);
+  tr.querySelector('.col-total').textContent = total || '—';
+}
+
+async function saveCount(input) {
+  const rowNum = input.dataset.row;
+  const managerName = input.dataset.manager;
+  const value = parseInt(input.value)||0;
+  input.style.borderColor = '#E0DDD8';
+  await api({action:'updateCount', rowNum, targetName:managerName, value});
+  input.style.borderColor = '#C9A84C';
 }
 
 async function deleteEdutRow(rowNum) {
