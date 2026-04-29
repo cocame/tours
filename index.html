@@ -196,7 +196,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyfHStlB5NrQRCjg_8jOLHV9Q0l-U4wolV0y8NfVbUG0LOeEOekLAKcwzZ21kgQQ_1Y/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwFfckkBCP0lziK_xiuY0tKtLQ1IQjdbRsdwmliMJ2K-PUxcIroGKwTs0aR-b1qiiM/exec';
 let token='', user=null, edutData=[], zaprosData=[], sortDir='asc';
 
 async function api(params) {
@@ -295,17 +295,12 @@ function toggleSort() { sortDir=sortDir==='asc'?'desc':'asc'; renderEdut(); }
 function formatDate(d) {
   if (!d || d === '0' || d === '') return '';
   const s = String(d).trim();
+  // Date range like 03.05–06.05 — return as is
+  if (s.includes('–') || s.includes('-') && s.includes('.')) return s;
   // Already DD.MM
   if (/^\d{1,2}\.\d{2}$/.test(s)) {
     const parts = s.split('.');
     return parts[0].padStart(2,'0') + '.' + parts[1];
-  }
-  // Google Sheets serial number (integer > 1000)
-  if (/^\d+$/.test(s) && parseInt(s) > 1000) {
-    const date = new Date(Math.round((parseInt(s) - 25569) * 86400 * 1000));
-    const day = String(date.getUTCDate()).padStart(2,'0');
-    const mon = String(date.getUTCMonth()+1).padStart(2,'0');
-    return `${day}.${mon}`;
   }
   // ISO with T
   if (s.includes('T')) {
@@ -313,7 +308,7 @@ function formatDate(d) {
     return parts[2].padStart(2,'0') + '.' + parts[1].padStart(2,'0');
   }
   // YYYY-MM-DD
-  if (s.includes('-')) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     const [y,m,day] = s.split('-');
     return day.padStart(2,'0') + '.' + m.padStart(2,'0');
   }
@@ -405,8 +400,8 @@ function renderZapros() {
     const note = row.note || '';
     const canEditNote = isAdmin || row.manager === user.name;
     const noteCell = canEditNote
-      ? `<td><input type="text" class="note-input" data-row="${row._row}" value="${note}" placeholder="—" onblur="saveNote(this)"></td>`
-      : `<td style="font-size:13px;color:#AAA">${isAdmin ? note||'—' : '—'}</td>`;
+      ? `<td style="min-width:120px"><input type="text" class="note-input" data-row="${row._row}" value="${note.replace(/"/g,'&quot;')}" placeholder="—" onblur="saveNote(this)"></td>`
+      : `<td style="font-size:13px;color:#AAA;min-width:80px">${isAdmin ? note||'—' : '—'}</td>`;
     const del=isAdmin?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'';
     return `<tr>
       <td class="col-date">${formatDate(row.date)}</td>
