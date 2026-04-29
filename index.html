@@ -68,6 +68,9 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .btn-primary { background:#C9A84C; color:#fff; }
 .date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
 .date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
+.tour-checkboxes { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:180px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; padding:10px 12px; }
+.tour-check { display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; }
+.tour-check input { width:16px; height:16px; accent-color:#C9A84C; cursor:pointer; }
 
 </style>
 </head>
@@ -168,17 +171,17 @@ td.col-manager { text-align:center; padding:7px 8px; }
         <input type="date" id="zaprosDateTo" style="flex:1;padding:9px 12px;border:1.5px solid #E0DDD8;border-radius:8px;font-size:14px;outline:none;background:#F4F4F2;">
       </div>
     </div>
-    <label>Тур</label>
-    <select id="zaprosTour" onchange="toggleZaprosCustom(this.value)">
-      <option value="">— выбери —</option>
-      <option>Ба На Хиллс</option><option>Дананг</option><option>Hot Springs</option>
-      <option>Морская прогулка</option><option>Острова Чам</option><option>VinWonders</option>
-      <option>Хой Ан</option><option>Хюэ</option><option>Любой</option>
-      <option value="__custom__">✏️ Другое...</option>
-    </select>
-    <div id="zaprosCustomWrap" style="display:none">
-      <label>Название</label>
-      <input type="text" id="zaprosCustom" placeholder="Введи название">
+    <label>Тур (можно несколько)</label>
+    <div class="tour-checkboxes">
+      <label class="tour-check"><input type="checkbox" value="Ба На Хиллс"> Ба На Хиллс</label>
+      <label class="tour-check"><input type="checkbox" value="Дананг"> Дананг</label>
+      <label class="tour-check"><input type="checkbox" value="Hot Springs"> Hot Springs</label>
+      <label class="tour-check"><input type="checkbox" value="Морская прогулка"> Морская прогулка</label>
+      <label class="tour-check"><input type="checkbox" value="Острова Чам"> Острова Чам</label>
+      <label class="tour-check"><input type="checkbox" value="VinWonders"> VinWonders</label>
+      <label class="tour-check"><input type="checkbox" value="Хой Ан"> Хой Ан</label>
+      <label class="tour-check"><input type="checkbox" value="Хюэ"> Хюэ</label>
+      <label class="tour-check" id="checkLuboi"><input type="checkbox" value="Любой" onchange="toggleLuboi(this)"> Любой</label>
     </div>
     <label>Количество человек</label>
     <input type="number" id="zaprosCount" min="1" placeholder="0">
@@ -368,18 +371,25 @@ function setDateType(type) {
   document.getElementById('btnRange').classList.toggle('active', type==='range');
 }
 
+function toggleLuboi(cb) {
+  // if "Любой" checked — uncheck all others
+  if (cb.checked) {
+    document.querySelectorAll('.tour-check input').forEach(inp => {
+      if (inp.value !== 'Любой') inp.checked = false;
+    });
+  }
+}
+
 function openZaprosModal() {
   setDateType('single');
   document.getElementById('zaprosDateSingle').value = new Date().toISOString().split('T')[0];
   document.getElementById('zaprosDateFrom').value = '';
   document.getElementById('zaprosDateTo').value = '';
-  document.getElementById('zaprosTour').value='';
-  document.getElementById('zaprosCount').value='';
-  document.getElementById('zaprosCustomWrap').style.display='none';
+  document.querySelectorAll('.tour-check input').forEach(inp => inp.checked = false);
+  document.getElementById('zaprosCount').value = '';
   document.getElementById('zaprosModal').classList.add('active');
 }
 function closeZaprosModal() { document.getElementById('zaprosModal').classList.remove('active'); }
-function toggleZaprosCustom(v) { document.getElementById('zaprosCustomWrap').style.display=v==='__custom__'?'block':'none'; }
 
 async function submitZapros() {
   let date;
@@ -397,8 +407,8 @@ async function submitZapros() {
     const [y2,m2,d2] = to.split('-');
     date = `${d1}.${m1}–${d2}.${m2}`;
   }
-  let tour=document.getElementById('zaprosTour').value;
-  if (tour==='__custom__') tour=document.getElementById('zaprosCustom').value.trim();
+  const checked = [...document.querySelectorAll('.tour-check input:checked')].map(i=>i.value);
+  const tour = checked.join(', ');
   const count=document.getElementById('zaprosCount').value;
   if (!tour||!count) { alert('Заполни все поля'); return; }
   closeZaprosModal();
