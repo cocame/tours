@@ -60,9 +60,10 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .note-input:focus { border-color:#C9A84C; background:#fff; }
 .date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
 .date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
-.tour-checkboxes { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:200px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; padding:10px 12px; }
-.tour-check { display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer; }
-.tour-check input { width:16px; height:16px; accent-color:#C9A84C; cursor:pointer; }
+.tour-checkboxes { display:flex; flex-direction:column; margin-bottom:14px; max-height:220px; overflow-y:auto; background:#F4F4F2; border:1.5px solid #E0DDD8; border-radius:8px; }
+.tour-check { display:flex; flex-direction:row; align-items:center; gap:12px; font-size:14px; cursor:pointer; padding:10px 14px; border-bottom:1px solid #E8E4DC; margin:0; }
+.tour-check:last-child { border-bottom:none; }
+.tour-check input[type="checkbox"] { width:18px; height:18px; min-width:18px; accent-color:#C9A84C; cursor:pointer; margin:0; }
 .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:200; align-items:center; justify-content:center; }
 .overlay.active { display:flex; }
 .modal { background:#fff; border-radius:14px; padding:26px; width:340px; max-width:92vw; box-shadow:0 8px 40px rgba(0,0,0,0.12); }
@@ -202,7 +203,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyUhba22WDnwBY9W9GBoIo00WmYQIV0vpvSOlKv0P5_I0-ebyLCfa2P0njmaG66tueJ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbx7b5IqL-DyQuYuIKCaesHdcfIYDKH-e6YdJ-mC7_6uHFZGL8fDJ_ZwPQiy6WxY2Ft9/exec';
 
 let token='', user=null, edutData=[], edutManagers=[], zaprosData=[], sortDir='asc', zaprosSort='asc';
 
@@ -420,10 +421,10 @@ async function submitZapros() {
   }
   const checked = [...document.querySelectorAll('.tour-check input:checked')].map(i=>i.value);
   const tour = checked.join(', ');
-  const count = document.getElementById('zaprosCount').value;
+  const count = Number(document.getElementById('zaprosCount').value) || 0;
   if (!tour||!count) { alert('Заполни все поля'); return; }
   closeZaprosModal();
-  await api({action:'addZapros', date, tour, count});
+  await api({action:'addZapros', date, tour, count: count});
   await loadZapros();
 }
 
