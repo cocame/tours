@@ -343,6 +343,8 @@ async function submitEdutRow() {
   let tour = document.getElementById('edutTour').value;
   if (tour==='__custom__') tour = document.getElementById('edutCustom').value.trim();
   if (!rawDate||!tour) { alert('Заполни все поля'); return; }
+  const today = new Date(); today.setHours(0,0,0,0);
+  if (new Date(rawDate) < today) { alert('Нельзя добавить прошедшую дату'); return; }
   const parts = rawDate.split('-');
   const date = parts[2]+'.'+parts[1];
   closeEdutModal();
@@ -421,12 +423,15 @@ async function submitZapros() {
   if (isSingle) {
     const d = document.getElementById('zaprosDateSingle').value;
     if (!d) { alert('Выбери дату'); return; }
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (new Date(d) < today) { alert('Нельзя добавить прошедшую дату'); return; }
     const parts = d.split('-');
     date = parts[2]+'.'+parts[1];
   } else {
     const from = document.getElementById('zaprosDateFrom').value;
     const to = document.getElementById('zaprosDateTo').value;
     if (!from||!to) { alert('Выбери даты'); return; }
+    if (new Date(from) > new Date(to)) { alert('Начальная дата не может быть позже конечной'); return; }
     const p1=from.split('-'), p2=to.split('-');
     date = p1[2]+'.'+p1[1]+'–'+p2[2]+'.'+p2[1];
   }
