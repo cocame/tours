@@ -56,7 +56,7 @@ td.col-manager { text-align:center; padding:7px 8px; }
 .delete-row-btn { background:none; border:none; color:#DDD; cursor:pointer; font-size:16px; padding:4px 6px; border-radius:4px; }
 .delete-row-btn:hover { color:#C0392B; }
 .empty-state { text-align:center; padding:40px 20px; color:#AAA; font-size:14px; }
-.note-input { width:100%; min-width:90px; padding:5px 8px; border:1.5px solid #E0DDD8; border-radius:6px; font-size:13px; background:#F4F4F2; outline:none; }
+.note-input { width:100%; min-width:120px; padding:6px 8px; border:1.5px solid #E0DDD8; border-radius:6px; font-size:13px; background:#F4F4F2; outline:none; resize:none; min-height:36px; line-height:1.4; font-family:inherit; overflow:hidden; }
 .note-input:focus { border-color:#C9A84C; background:#fff; }
 .date-type-btn { flex:1; padding:8px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:1.5px solid #E0DDD8; background:#F4F4F2; color:#888; }
 .date-type-btn.active { background:#C9A84C; color:#fff; border-color:#C9A84C; }
@@ -375,8 +375,8 @@ function renderZapros() {
     const note = row.note||'';
     const canEditNote = isAdmin || row.manager===user.name;
     const noteCell = canEditNote
-      ? `<td style="min-width:120px"><input type="text" class="note-input" data-row="${row._row}" value="${note.replace(/"/g,'&quot;')}" placeholder="—" onblur="saveNote(this)"></td>`
-      : `<td style="font-size:13px;color:#AAA">${isAdmin?note||'—':'—'}</td>`;
+      ? `<td style="min-width:140px"><textarea class="note-input" data-row="${row._row}" placeholder="—" onblur="saveNote(this)" oninput="autoResize(this)">${note.replace(/</g,'&lt;')}</textarea></td>`
+      : `<td style="font-size:13px;color:#555;min-width:100px;white-space:pre-wrap">${isAdmin?note||'—':'—'}</td>`;
     const del = isAdmin?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'';
     return `<tr>
       <td class="col-date">${row.date}</td>
@@ -438,6 +438,11 @@ async function deleteZapros(rowNum) {
   if (!confirm('Удалить запрос?')) return;
   await api({action:'deleteZapros', rowNum});
   await loadZapros();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
 
 async function saveNote(input) {
