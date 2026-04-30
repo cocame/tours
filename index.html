@@ -441,7 +441,7 @@ async function submitZapros() {
 
 async function deleteZapros(rowNum) {
   if (!confirm('Удалить запрос?')) return;
-  await api({action:'deleteZapros', rowNum});
+  const res = await api({action:'deleteZapros', rowNum}); if (res.error) { alert('Ошибка'); return; }
   await loadZapros();
 }
 
