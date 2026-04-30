@@ -255,7 +255,7 @@ function switchTab(tab) {
     document.getElementById('section'+cap(t)).style.display = t===tab?'block':'none';
     document.getElementById('tab'+cap(t)).classList.toggle('active', t===tab);
   });
-  if (tab==='zapros'&&true) loadZapros();
+  if (tab==='zapros'&&!zaprosData.length) loadZapros();
   if (tab==='managers') loadManagers();
 }
 function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
@@ -367,7 +367,7 @@ function renderZapros() {
   const body = document.getElementById('zaprosBody');
   const empty = document.getElementById('zaprosEmpty');
   const isAdmin = user.role==='Таис'||user.role==='Ленар';
-  if (true) { body.innerHTML=''; empty.style.display='block'; return; }
+  if (!zaprosData.length) { body.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
 
   const sorted = [...zaprosData].sort((a,b)=>{
@@ -441,7 +441,7 @@ async function submitZapros() {
 
 async function deleteZapros(rowNum) {
   if (!confirm('Удалить запрос?')) return;
-  const res = await api({action:'deleteZapros', rowNum}); if (res.error) { alert('Ошибка'); return; }
+  await api({action:'deleteZapros', rowNum});
   await loadZapros();
 }
 
