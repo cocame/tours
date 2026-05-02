@@ -382,7 +382,7 @@ function renderZapros() {
     const isMyRow = row.manager===user.name;
     const canEditNote = isAdmin || isMyRow;
     const noteCell = canEditNote
-      ? `<td style="min-width:140px"><textarea class="note-input" data-row="${row._row}" placeholder="—" onblur="saveNote(this)" oninput="autoResize(this)">${note.replace(/</g,'&lt;')}</textarea></td>`
+      ? `<td style="min-width:140px; vertical-align:top"><textarea class="note-input" data-row="${row._row}" placeholder="—" onblur="saveNote(this)" oninput="autoResize(this)">${note.replace(/</g,'&lt;')}</textarea></td>`
       : `<td style="font-size:13px;color:#AAA;min-width:100px">—</td>`;
     const canDelete = isAdmin || isMyRow;
     const del = canDelete?`<td><button class="delete-row-btn" onclick="deleteZapros(${row._row})">✕</button></td>`:'<td></td>';    return `<tr>
