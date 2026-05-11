@@ -299,6 +299,7 @@ function renderEdut() {
     const del = isAdmin?`<td><button class="delete-row-btn" onclick="deleteEdutRow(${row._row})">✕</button></td>`:'';
     return `<tr><td class="col-date">${row.date}</td><td class="col-excursion">${row.tour}</td><td class="col-total" id="total-${row._row}">${total||'—'}</td>${cells}${del}</tr>`;
   }).join('');
+  document.querySelectorAll('.note-input').forEach(el => autoResize(el));
 }
 
 function toggleSort() { sortDir=sortDir==='asc'?'desc':'asc'; renderEdut(); }
