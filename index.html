@@ -287,7 +287,8 @@ function renderEdut() {
   empty.style.display='none';
 
   const sorted = [...edutData].sort((a,b)=>{
-    const c = String(a.date).localeCompare(String(b.date));
+    const toNum = d => { const p=String(d).split('.'); return parseInt(p[1]||0)*100+parseInt(p[0]||0); };
+    const c = toNum(a.date) - toNum(b.date);
     return sortDir==='asc'?c:-c;
   });
 
